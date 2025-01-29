@@ -1,3 +1,6 @@
+from pydoc import text
+from click import option
+from pydantic import BaseModel
 from typing import Optional
 from fastapi import FastAPI
 
@@ -38,3 +41,15 @@ def show(id: int):
 @app.get("/blog/{id}/comments")
 def comments(id):
     return {"data": {"1", "2"}}
+
+
+class Blog(BaseModel):
+    title: str
+    body: str
+    published_at: Optional[bool]  # this category is optional
+
+
+@app.post("/blog")
+def create_blog(blog: Blog):
+    # return request
+    return {"data": f"blog created with title as {blog.title}"}
