@@ -1,5 +1,5 @@
-from pydoc import text
-from click import option
+# imported for changing port number
+# import uvicorn
 from pydantic import BaseModel
 from typing import Optional
 from fastapi import FastAPI
@@ -53,3 +53,12 @@ class Blog(BaseModel):
 def create_blog(blog: Blog):
     # return request
     return {"data": f"blog created with title as {blog.title}"}
+
+
+"""
+# this is to change the port. for this u import uvicorn
+to get in port 9300 u run python3 main.py
+otherwise when u run uvicorn main:app --reload it runs on 8000
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=9300)
+"""
