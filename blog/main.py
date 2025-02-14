@@ -1,7 +1,9 @@
+from typing import List
 from sqlalchemy.orm import Session
 from fastapi import Depends, FastAPI, Response, status, HTTPException
 from . import schemas, models
 from .database import engine, SessionLocal
+from passlib.context import CryptContext
 
 app = FastAPI()
 
@@ -36,7 +38,7 @@ def create(
     return new_blog
 
 
-@app.get("/blog")
+@app.get("/blog", response_model=List[schemas.ShowBlog])
 def all(db: Session = Depends(get_db)):
     blogs = db.query(
         models.Blog
@@ -44,7 +46,7 @@ def all(db: Session = Depends(get_db)):
     return blogs
 
 
-@app.get("/blog/{id}", status_code=200)
+@app.get("/blog/{id}", status_code=200, response_model=schemas.ShowBlog)
 def show(id, response: Response, db: Session = Depends(get_db)):
     blog = (
         db.query(models.Blog).filter(models.Blog.id == id).first()
@@ -86,3 +88,19 @@ def update(id, request: schemas.Blog, db: Session = Depends(get_db)):
     blog.update({"title": request.title, "body": request.body})
     db.commit()
     return {"message": "updated"}
+
+
+pwd_cxt = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# above line is to b written as it is
+
+
+@app.post("/user")
+def create_user(request: schemas.User, db: Session = Depends(get_db)):
+    hashedPassword = pwd_cxt.hash(request.password)
+    new_user = models.User(
+        name=request.name, email=request.email, password=hashedPassword
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
